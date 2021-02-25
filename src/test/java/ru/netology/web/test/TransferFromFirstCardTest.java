@@ -1,16 +1,12 @@
 package ru.netology.web.test;
 
-
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.SelenideElement;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.web.data.DataHelper;
 import ru.netology.web.page.DashboardPage;
-import ru.netology.web.page.LoginPageV2;
+import ru.netology.web.page.LoginPage;
 
-import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -19,12 +15,11 @@ public class TransferFromFirstCardTest {
     DataHelper.Card firstCard = DataHelper.getFirstCard();
     String firstCardNumber = DataHelper.getFirstCard().getNumber();
     String secondCardNumber = DataHelper.getSecondCard().getNumber();
-    private SelenideElement error = $("[data-test-id=error-notification]");
 
     @BeforeEach
     void setup() {
         open("http://localhost:9999/");
-        val loginPage = new LoginPageV2();
+        val loginPage = new LoginPage();
         val authInfo = DataHelper.getAuthInfo();
         val verificationPage = loginPage.validLogin(authInfo);
         val verificationCode = DataHelper.getVerificationCodeFor(authInfo);
@@ -91,7 +86,18 @@ public class TransferFromFirstCardTest {
     @Test
     void shouldNotTransfer15000Rub() {
         val moneyTransferPage = dashboardPage.selectCard(secondCardNumber);
-        moneyTransferPage.MoneyTransfer(15000, firstCard);
-        error.shouldBe(Condition.visible);
+        moneyTransferPage.shouldGiveErrorWhenAmountExceedsBalance(15000, firstCard);
+    }
+
+    @Test
+    void shouldNotTransferWhenAmountIsEmpty() {
+        val moneyTransferPage = dashboardPage.selectCard(secondCardNumber);
+        moneyTransferPage.shouldGiveErrorWhenAmountIsEmpty(firstCard);
+    }
+
+    @Test
+    void shouldNotTransferWhenFromCardIsEmpty() {
+        val moneyTransferPage = dashboardPage.selectCard(secondCardNumber);
+        moneyTransferPage.shouldGiveErrorWhenFromCardIsEmpty(5500);
     }
 }

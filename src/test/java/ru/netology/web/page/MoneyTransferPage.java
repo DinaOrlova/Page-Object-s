@@ -13,6 +13,7 @@ public class MoneyTransferPage {
     private SelenideElement amount = $("[data-test-id=amount] input");
     private SelenideElement fromCard = $("[data-test-id=from] input");
     private SelenideElement transferButton = $("[data-test-id=action-transfer]");
+    private SelenideElement error = $("[data-test-id=error-notification]");
 
     public MoneyTransferPage() {
         heading.shouldBe(Condition.visible);
@@ -36,5 +37,32 @@ public class MoneyTransferPage {
         fromCard.setValue(card.getNumber());
         transferButton.click();
         return new DashboardPage();
+    }
+
+    public void shouldGiveErrorWhenAmountExceedsBalance(int transferAmount, DataHelper.Card card) {
+        String str = Integer.toString(transferAmount);
+        deleteAmount();
+        amount.setValue(str);
+        deleteFrom();
+        fromCard.setValue(card.getNumber());
+        transferButton.click();
+        error.shouldHave(Condition.text("Ошибка!")).should(Condition.visible);
+    }
+
+    public void shouldGiveErrorWhenAmountIsEmpty(DataHelper.Card card) {
+        deleteAmount();
+        deleteFrom();
+        fromCard.setValue(card.getNumber());
+        transferButton.click();
+        error.shouldHave(Condition.text("Ошибка!")).should(Condition.visible);
+    }
+
+    public void shouldGiveErrorWhenFromCardIsEmpty(int transferAmount) {
+        String str = Integer.toString(transferAmount);
+        deleteAmount();
+        amount.setValue(str);
+        deleteFrom();
+        transferButton.click();
+        error.shouldHave(Condition.text("Ошибка!")).should(Condition.visible);
     }
 }
